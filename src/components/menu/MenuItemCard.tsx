@@ -75,7 +75,7 @@ export default function MenuItemCard({
       </div>
 
       {/* Content area */}
-      <div className="p-5">
+      <div className="p-6">
         <h3 className="font-heading text-xl md:text-2xl leading-[1.2]">
           {name}
         </h3>
