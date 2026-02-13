@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -32,6 +32,7 @@ export default function Navbar({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // --- Navigation links ---
   const navLinks: NavLink[] = [
@@ -71,6 +72,40 @@ export default function Navbar({
     return () => {
       document.body.classList.remove("overflow-hidden");
     };
+  }, [menuOpen]);
+
+  // --- Focus trap for mobile menu ---
+  useEffect(() => {
+    if (!menuOpen) return;
+    const menu = menuRef.current;
+    if (!menu) return;
+
+    const focusableElements = menu.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstEl = focusableElements[0];
+    const lastEl = focusableElements[focusableElements.length - 1];
+
+    // Focus the close button on open
+    firstEl?.focus();
+
+    function handleTab(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl?.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl?.focus();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
   }, [menuOpen]);
 
   // --- Active link helper ---
@@ -116,7 +151,8 @@ export default function Navbar({
                 href={link.href}
                 className={cn(
                   "text-[15px] font-medium font-body text-foreground hover:text-primary transition-colors",
-                  isActive(link.href) && "text-primary",
+                  "relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-primary after:w-0 hover:after:w-full after:transition-all after:duration-200",
+                  isActive(link.href) && "text-primary after:w-full",
                 )}
               >
                 {link.label}
@@ -141,6 +177,7 @@ export default function Navbar({
 
       {/* Mobile Menu Overlay */}
       <div
+        ref={menuRef}
         role="dialog"
         aria-label="Mobile navigation"
         className={cn(

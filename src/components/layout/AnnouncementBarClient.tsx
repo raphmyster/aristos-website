@@ -27,6 +27,7 @@ export function AnnouncementBarClient({
   style,
 }: AnnouncementBarClientProps) {
   const [dismissed, setDismissed] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(STORAGE_KEY) === "true") {
@@ -36,7 +37,8 @@ export function AnnouncementBarClient({
 
   function handleDismiss() {
     sessionStorage.setItem(STORAGE_KEY, "true");
-    setDismissed(true);
+    setDismissing(true);
+    setTimeout(() => setDismissed(true), 200);
   }
 
   if (dismissed) return null;
@@ -44,8 +46,10 @@ export function AnnouncementBarClient({
   return (
     <div
       className={cn(
-        "relative flex min-h-[40px] items-center justify-center px-4",
+        "relative flex items-center justify-center px-4",
         "text-sm font-medium font-body",
+        "transition-all duration-200 ease-in-out overflow-hidden",
+        dismissing ? "opacity-0 max-h-0" : "max-h-12",
         styleVariants[style],
       )}
     >
