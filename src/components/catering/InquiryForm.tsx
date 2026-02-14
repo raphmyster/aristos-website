@@ -9,7 +9,6 @@ interface FormData {
   phone: string;
   eventDate: string;
   guestCount: string;
-  packagePreference: string;
   message: string;
   website: string; // honeypot
 }
@@ -17,6 +16,9 @@ interface FormData {
 interface FormErrors {
   name?: string;
   email?: string;
+  phone?: string;
+  eventDate?: string;
+  guestCount?: string;
 }
 
 const initialFormData: FormData = {
@@ -25,7 +27,6 @@ const initialFormData: FormData = {
   phone: "",
   eventDate: "",
   guestCount: "",
-  packagePreference: "",
   message: "",
   website: "",
 };
@@ -45,9 +46,7 @@ export default function InquiryForm() {
   const [submitted, setSubmitted] = useState(false);
 
   function handleChange(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -73,6 +72,18 @@ export default function InquiryForm() {
       newErrors.email = "Email is required.";
     } else if (!EMAIL_REGEX.test(formData.email.trim())) {
       newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required.";
+    }
+
+    if (!formData.eventDate.trim()) {
+      newErrors.eventDate = "Event date is required.";
+    }
+
+    if (!formData.guestCount.trim()) {
+      newErrors.guestCount = "Guest count is required.";
     }
 
     return newErrors;
@@ -149,7 +160,7 @@ export default function InquiryForm() {
         {/* Row 2: Phone, Event Date */}
         <div>
           <label htmlFor="inquiry-phone" className={labelStyles}>
-            Phone
+            Phone <span className="text-destructive">*</span>
           </label>
           <input
             type="tel"
@@ -158,13 +169,16 @@ export default function InquiryForm() {
             value={formData.phone}
             onChange={handleChange}
             placeholder="(555) 123-4567"
-            className={inputStyles}
+            className={`${inputStyles} ${errors.phone ? errorInputStyles : ""}`}
           />
+          {errors.phone && (
+            <p className="text-sm text-destructive mt-1">{errors.phone}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="inquiry-eventDate" className={labelStyles}>
-            Event Date
+            Event Date <span className="text-destructive">*</span>
           </label>
           <input
             type="date"
@@ -172,14 +186,17 @@ export default function InquiryForm() {
             name="eventDate"
             value={formData.eventDate}
             onChange={handleChange}
-            className={inputStyles}
+            className={`${inputStyles} ${errors.eventDate ? errorInputStyles : ""}`}
           />
+          {errors.eventDate && (
+            <p className="text-sm text-destructive mt-1">{errors.eventDate}</p>
+          )}
         </div>
 
-        {/* Row 3: Guest Count, Package Preference */}
+        {/* Row 3: Guest Count */}
         <div>
           <label htmlFor="inquiry-guestCount" className={labelStyles}>
-            Guest Count
+            Guest Count <span className="text-destructive">*</span>
           </label>
           <input
             type="number"
@@ -189,26 +206,11 @@ export default function InquiryForm() {
             onChange={handleChange}
             placeholder="Number of guests"
             min={1}
-            className={inputStyles}
+            className={`${inputStyles} ${errors.guestCount ? errorInputStyles : ""}`}
           />
-        </div>
-
-        <div>
-          <label htmlFor="inquiry-packagePreference" className={labelStyles}>
-            Package Preference
-          </label>
-          <select
-            id="inquiry-packagePreference"
-            name="packagePreference"
-            value={formData.packagePreference}
-            onChange={handleChange}
-            className={inputStyles}
-          >
-            <option value="">Not sure</option>
-            <option value="small">Small Gathering</option>
-            <option value="medium">Medium Event</option>
-            <option value="large">Large Event</option>
-          </select>
+          {errors.guestCount && (
+            <p className="text-sm text-destructive mt-1">{errors.guestCount}</p>
+          )}
         </div>
 
         {/* Message — full width within the grid */}
