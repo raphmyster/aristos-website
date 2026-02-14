@@ -9,7 +9,7 @@ export default function NotFound() {
           404
         </p>
         <h1 className="font-heading text-2xl md:text-[32px] leading-[1.2] text-foreground">
-          Looks like this page doesn't exist
+          Looks like this page doesn&apos;t exist
         </h1>
         <p className="text-secondary mt-3 text-lg">
           But our food definitely does.
