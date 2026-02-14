@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Button from "@/components/shared/Button";
+import { sendCateringInquiry } from "@/actions/sendCateringInquiry";
+import { Loader2 } from "lucide-react";
 
 interface FormData {
   name: string;
@@ -44,12 +46,19 @@ export default function InquiryForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear server error when user starts typing
+    if (serverError) {
+      setServerError(null);
+    }
 
     // Clear error for this field when the user starts typing
     if (name in errors) {
@@ -89,7 +98,7 @@ export default function InquiryForm() {
     return newErrors;
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     // Honeypot check — if filled in, silently "succeed"
@@ -105,8 +114,18 @@ export default function InquiryForm() {
       return;
     }
 
-    // Phase 7 will wire the server action. For now, show success.
-    setSubmitted(true);
+    setSubmitting(true);
+    setServerError(null);
+
+    const result = await sendCateringInquiry(formData);
+
+    setSubmitting(false);
+
+    if (result.success) {
+      setSubmitted(true);
+    } else {
+      setServerError(result.error ?? "Something went wrong.");
+    }
   }
 
   if (submitted) {
@@ -132,6 +151,7 @@ export default function InquiryForm() {
             value={formData.name}
             onChange={handleChange}
             placeholder="Your name"
+            disabled={submitting}
             className={`${inputStyles} ${errors.name ? errorInputStyles : ""}`}
           />
           {errors.name && (
@@ -150,6 +170,7 @@ export default function InquiryForm() {
             value={formData.email}
             onChange={handleChange}
             placeholder="you@example.com"
+            disabled={submitting}
             className={`${inputStyles} ${errors.email ? errorInputStyles : ""}`}
           />
           {errors.email && (
@@ -169,6 +190,7 @@ export default function InquiryForm() {
             value={formData.phone}
             onChange={handleChange}
             placeholder="(555) 123-4567"
+            disabled={submitting}
             className={`${inputStyles} ${errors.phone ? errorInputStyles : ""}`}
           />
           {errors.phone && (
@@ -186,6 +208,7 @@ export default function InquiryForm() {
             name="eventDate"
             value={formData.eventDate}
             onChange={handleChange}
+            disabled={submitting}
             className={`${inputStyles} ${errors.eventDate ? errorInputStyles : ""}`}
           />
           {errors.eventDate && (
@@ -206,6 +229,7 @@ export default function InquiryForm() {
             onChange={handleChange}
             placeholder="Number of guests"
             min={1}
+            disabled={submitting}
             className={`${inputStyles} ${errors.guestCount ? errorInputStyles : ""}`}
           />
           {errors.guestCount && (
@@ -225,6 +249,7 @@ export default function InquiryForm() {
             onChange={handleChange}
             rows={4}
             placeholder="Tell us about your event..."
+            disabled={submitting}
             className={inputStyles}
           />
         </div>
@@ -242,9 +267,22 @@ export default function InquiryForm() {
         aria-hidden="true"
       />
 
+      {serverError && (
+        <div className="mt-4 bg-destructive/10 border border-destructive/20 rounded-md p-3 text-destructive text-sm">
+          {serverError}
+        </div>
+      )}
+
       <div className="mt-6">
-        <Button variant="primary" size="lg" type="submit">
-          Send Inquiry
+        <Button variant="primary" size="lg" type="submit" disabled={submitting}>
+          {submitting ? (
+            <span className="inline-flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Sending...
+            </span>
+          ) : (
+            "Send Inquiry"
+          )}
         </Button>
       </div>
     </form>

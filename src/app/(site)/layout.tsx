@@ -3,6 +3,8 @@ import { siteSettingsQuery, primaryLocationQuery } from "@/sanity/lib/queries";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import JsonLd from "@/components/seo/JsonLd";
+import { urlFor } from "@/sanity/lib/image";
 
 export default async function SiteLayout({
   children,
@@ -47,6 +49,14 @@ export default async function SiteLayout({
         enableCareers={settings?.enableCareers}
         enableAllergens={settings?.enableAllergens}
         primaryLocation={primaryLocation}
+      />
+      <JsonLd
+        name={settings?.name ?? "Aristos Greek Restaurant"}
+        description={settings?.tagline}
+        phone={settings?.phone}
+        address={primaryLocation?.address}
+        url={process.env.NEXT_PUBLIC_SITE_URL}
+        image={settings?.heroImage ? urlFor(settings.heroImage).width(1200).height(630).url() : undefined}
       />
     </>
   );
