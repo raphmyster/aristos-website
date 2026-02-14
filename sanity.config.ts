@@ -54,6 +54,7 @@ export default defineConfig({
   title: "Aristos",
   projectId,
   dataset,
+  basePath: "/studio",
   plugins: [
     structureTool({ structure }),
     visionTool({ defaultApiVersion: apiVersion }),
